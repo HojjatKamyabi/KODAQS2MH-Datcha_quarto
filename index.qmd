@@ -22,15 +22,50 @@ prefer-html: true
 
 In this tutorial you will learn:
 
-1. **Local application of Datcha shiny app:** The tutorial demonstrates how to run Datcha's underlying code locally, allowing users to apply the tool to their own datasets without relying on the hosted [**Datcha app**](https://shiny.gesis.org/datcha/) version. This ensures that sensitive or proprietary data can be analyzed in a local environment, while also providing full access to the underlying code for transparency and reproducibility.
-2. **Detecting temporal change in longitudinal social media data:** The tutorial provides a practical guide on how two online platform dataset snapshots, collected at different points in time, can be systematically compared to identify three core types of change: deleted posts, newly added posts, and text-level edits. Matching is performed through unique post identifiers, making the procedure transparent and reproducible.
-2. **Assessing data quality and stability before analysis:** By quantifying how much content was removed, added, or modified between collection points, the tutorial shows how researchers can evaluate the consistency of their data and judge whether a dataset is stable enough for the intended analysis.
-3. **Characterizing the nature of changed content:** Word frequency comparisons, sentiment analysis, keyness analysis, and topic modeling are applied to removed, added, and remaining posts. These methods help to determine whether changes are random or systematic, for example, whether deleted posts differ in tone or topic from the content that persists.
-4. **Quantifying the magnitude of textual edits:** For posts that were modified between the two collection points, edit distance and normalized edit distance are computed, and character-level diff views are generated. This makes it possible to distinguish minor corrections (e.g., hashtag adjustments) from substantive content revisions.
+1.  **Local application of Datcha shiny app:** The tutorial demonstrates
+    how to run Datcha's underlying code locally, allowing users to apply
+    the tool to their own datasets without relying on the hosted
+    [**Datcha app**](https://shiny.gesis.org/datcha/) version. This
+    ensures that sensitive or proprietary data can be analyzed in a
+    local environment, while also providing full access to the
+    underlying code for transparency and reproducibility.
+2.  **Detecting temporal change in longitudinal social media data:** The
+    tutorial provides a practical guide on how two online platform
+    dataset snapshots, collected at different points in time, can be
+    systematically compared to identify three core types of change:
+    deleted posts, newly added posts, and text-level edits. Matching is
+    performed through unique post identifiers, making the procedure
+    transparent and reproducible.
+3.  **Assessing data quality and stability before analysis:** By
+    quantifying how much content was removed, added, or modified between
+    collection points, the tutorial shows how researchers can evaluate
+    the consistency of their data and judge whether a dataset is stable
+    enough for the intended analysis.
+4.  **Characterizing the nature of changed content:** Word frequency
+    comparisons, sentiment analysis, keyness analysis, and topic
+    modeling are applied to removed, added, and remaining posts. These
+    methods help to determine whether changes are random or systematic,
+    for example, whether deleted posts differ in tone or topic from the
+    content that persists.
+5.  **Quantifying the magnitude of textual edits:** For posts that were
+    modified between the two collection points, edit distance and
+    normalized edit distance are computed, and character-level diff
+    views are generated. This makes it possible to distinguish minor
+    corrections (e.g., hashtag adjustments) from substantive content
+    revisions.
 
 # 1. Introduction {#introduction}
 
-Social media platforms are inherently dynamic and ephemeral environments in which content is continuously created, modified, and removed [@weller2026can]. When researchers collect datasets from such platforms at different points in time, the resulting snapshots are rarely identical, i.e., posts may be deleted [@khan2025characterization; @buehling2024message] by users or platform moderation systems, new content may emerge, and existing posts may undergo textual revision. These temporal discrepancies, if left unexamined, can introduce systematic bias into longitudinal analyses and compromise the reproducibility of findings.
+Social media platforms are inherently dynamic and ephemeral environments
+in which content is continuously created, modified, and removed
+[@weller2026can]. When researchers collect datasets from such platforms
+at different points in time, the resulting snapshots are rarely
+identical, i.e., posts may be deleted [@khan2025characterization;
+@buehling2024message] by users or platform moderation systems, new
+content may emerge, and existing posts may undergo textual revision.
+These temporal discrepancies, if left unexamined, can introduce
+systematic bias into longitudinal analyses and compromise the
+reproducibility of findings.
 
 Datcha (**Dat**a **cha**nge) addresses this methodological gap by providing a
 structured, reproducible framework for detecting and quantifying three core types of
@@ -43,11 +78,17 @@ This tool is designed with GDPR compliance in mind, assumes that input data are 
 
 # 2. Set-up
 
-Prior to executing the analysis, the environment must be configured with the necessary dependencies. This section outlines the required libraries and the procedure for loading the two temporally distinct datasets that form the basis of the comparison.
+Prior to executing the analysis, the environment must be configured with
+the necessary dependencies. This section outlines the required libraries
+and the procedure for loading the two temporally distinct datasets that
+form the basis of the comparison.
 
 ### 2.1 Library Imports
 
-The following libraries support the core analytical pipeline, covering data manipulation, text preprocessing, statistical analysis, and visualization. Dependencies should be installed prior to execution if not already available in the working environment.
+The following libraries support the core analytical pipeline, covering
+data manipulation, text preprocessing, statistical analysis, and
+visualization. Dependencies should be installed prior to execution if
+not already available in the working environment.
 
 ```{r setup, message=FALSE, warning=FALSE}
 library(dplyr)          # Data manipulation
@@ -100,9 +141,32 @@ ojs_static_define <- function(...) {
 }
 ```
 
+```{=html}
+<script>
+if (!window.HTMLWidgets) {
+  var libs = "https://kodaqs-toolbox.gesis.org/github.com/kunjanshah0811/Datcha_quarto/index/index_files/libs/";
+  var hc = "highcharts-9.3.1/";
+  var modules = "stock map data exporting offline-exporting drilldown item-series overlapping-datalabels annotations export-data funnel heatmap treemap sankey dependency-wheel organization solid-gauge streamgraph sunburst vector wordcloud xrange tilemap venn gantt timeline parallel-coordinates bullet coloraxis dumbbell lollipop series-label".split(" ").map(function (m) { return hc + "modules/" + m + ".js"; });
+  ["htmltools-fill-0.5.9/fill.css", "htmlwidgets-1.6.4/htmlwidgets.js", "jquery-3.6.0/jquery-3.6.0.min.js", "proj4js-2.3.15/proj4.js", hc + "css/motion.css", hc + "highcharts.js", hc + "highcharts-3d.js", hc + "highcharts-more.js"]
+    .concat(modules, [hc + "plugins/motion.js", hc + "custom/reset.js", hc + "modules/boost.js", "highchart-binding-0.9.5/highchart.js",
+      "datatables-css-0.0.0/datatables-crosstalk.css", "datatables-binding-0.34.0/datatables.js", "dt-core-1.13.6/css/jquery.dataTables.min.css", "dt-core-1.13.6/css/jquery.dataTables.extra.css",
+      "dt-core-1.13.6/js/jquery.dataTables.min.js", "crosstalk-1.2.2/css/crosstalk.min.css", "crosstalk-1.2.2/js/crosstalk.min.js"])
+    .forEach(function (f) {
+      document.write(f.endsWith(".css") ? '<link rel="stylesheet" href="' + libs + f + '">' : '<script src="' + libs + f + '"><\/script>');
+    });
+}
+</script>
+```
+
 ### 2.2 Load Your Two Datasets
 
-For this tutorial, we use two synthetic datasets generated by a large language model. Because of legal and ethical constraints, we cannot publish real data from online platforms. If you run this code on your own data, make sure the datasets are fully anonymized and comply with applicable data protection laws. Both datasets should be provided as CSV files, accessible via a URL or a local file path.
+For this tutorial, we use two synthetic datasets generated by a large
+language model. Because of legal and ethical constraints, we cannot
+publish real data from online platforms. If you run this code on your
+own data, make sure the datasets are fully anonymized and comply with
+applicable data protection laws. Both datasets should be provided as CSV
+files, accessible via a URL or a local file path.
+
 ```{r message=FALSE, warning=FALSE}
 data1 <- read_csv("https://raw.githubusercontent.com/kunjanshah0811/Datcha_quarto/refs/heads/main/Data1.csv",
                   locale = locale(encoding = "UTF-8"), show_col_types = FALSE)
@@ -124,9 +188,15 @@ cat(
 
 ### 2.3 Enter ID Column and Dates
 
-Each dataset must share a common unique identifier column to enable record-level matching across collection points. Users are required to manually specify the ID column name for each dataset, as no auto-detection is performed to avoid erroneous assignments.
+Each dataset must share a common unique identifier column to enable
+record-level matching across collection points. Users are required to
+manually specify the ID column name for each dataset, as no
+auto-detection is performed to avoid erroneous assignments.
 
-**ID Column Specification:** <br> The identifier column name is defined separately for each dataset. A validation check confirms the specified column exists before proceeding. If not found, execution halts with an informative error. Here, the ID column is called "col_id".
+**ID Column Specification:** <br> The identifier column name is defined
+separately for each dataset. A validation check confirms the specified
+column exists before proceeding. If not found, execution halts with an
+informative error. Here, the ID column is called "col_id".
 
 ```{r message=FALSE, warning=FALSE}
 # User must manually specify the ID column names (no auto-detection)
@@ -145,7 +215,13 @@ cat(
 )
 ```
 
-**Collection Dates:**<br> The collection date for each dataset is set manually. A chronological validation ensures that Dataset 1 precedes Dataset 2 in time. This is a necessary condition for meaningful temporal comparison. The confirmed date range and interval in days are printed upon successful validation. In this example case, we choose a one-month interval between the two datasets, but users can adjust the dates to match their own data collection schedule.
+**Collection Dates:**<br> The collection date for each dataset is set
+manually. A chronological validation ensures that Dataset 1 precedes
+Dataset 2 in time. This is a necessary condition for meaningful temporal
+comparison. The confirmed date range and interval in days are printed
+upon successful validation. In this example case, we choose a one-month
+interval between the two datasets, but users can adjust the dates to
+match their own data collection schedule.
 
 ```{r message=FALSE, warning=FALSE}
 # Set your dates here
@@ -198,23 +274,31 @@ cat(output_text)
 
 ### 2.4 Text Processing Module
 
-A reusable text processing module is initialised prior to analysis, providing two core functions used consistently across all subsequent sections.
+A reusable text processing module is initialised prior to analysis,
+providing two core functions used consistently across all subsequent
+sections.
 
-Text Cleaning: <br>Raw text is normalised through a standard preprocessing pipeline: lowercasing, removal of numbers, punctuation, and stopwords, followed by whitespace stripping. Lemmatization is applied by default to reduce words to their base forms; stemming is available as an alternative but disabled unless explicitly specified.
+Text Cleaning: <br>Raw text is normalised through a standard
+preprocessing pipeline: lowercasing, removal of numbers, punctuation,
+and stopwords, followed by whitespace stripping. Lemmatization and
+stemming are available as optional steps to reduce words to their base
+forms, but both are disabled unless explicitly specified.
 
-Word Frequency: <br> Cleaned text is transformed into a document-term matrix from which term frequencies are extracted and ranked in descending order, forming the basis for all subsequent lexical analyses.
+Word Frequency: <br> Cleaned text is transformed into a document-term
+matrix from which term frequencies are extracted and ranked in
+descending order, forming the basis for all subsequent lexical analyses.
 
 ```{r message=FALSE, warning=FALSE}
 # TEXT PROCESSING MODULE
 text_processor <- list(
-  clean = function(text, use_stem = FALSE, use_lemma = TRUE) {
+  clean = function(text, use_stem = FALSE, use_lemma = FALSE) {
     # Use VCorpus + plain functions to avoid SimpleCorpus warnings
     corpus <- VCorpus(VectorSource(text))
 
     corpus <- tm_map(corpus, content_transformer(tolower))
     corpus <- tm_map(corpus, removeNumbers)
     corpus <- tm_map(corpus, removePunctuation)
-    corpus <- tm_map(corpus, removeWords, stopwords("en"))
+    corpus <- tm_map(corpus, removeWords, stopwords(source="smart"))
     corpus <- tm_map(corpus, stripWhitespace)
 
     if (use_stem) corpus <- tm_map(corpus, stemDocument)
@@ -229,28 +313,51 @@ text_processor <- list(
   },
 
   # Fixed get_freq – no gram_type argument needed for unigrams
-  get_freq = function(text) {
-    corpus <- VCorpus(VectorSource(text))
-    dtm    <- DocumentTermMatrix(corpus)
-    freq   <- slam::col_sums(dtm)               # faster & safer than colSums(as.matrix())
-    df     <- data.frame(word = names(freq), freq = freq, stringsAsFactors = FALSE) %>%
-      arrange(desc(freq))
-    df
+  get_freq = function(text, gram_type = "Uni-gram") {
+    if (gram_type == "Uni-gram") {
+      corpus <- Corpus(VectorSource(text))
+      dtm <- DocumentTermMatrix(corpus)
+      
+      # Use sparse-aware col_sums instead of as.matrix()
+      freq <- slam::col_sums(dtm)
+      
+      data.frame(word = names(freq), freq = freq) %>% 
+        arrange(desc(freq))
+    } else {
+      tibble(text = text) %>%
+        unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+        count(bigram, sort = TRUE) %>%
+        rename(word = bigram, freq = n)
+    }
   }
 )
 ```
+
 # 3. Application and analysis
 
 ### 3.1 Data Deletion
 
-This section identifies posts present in Dataset 1 that are absent from Dataset 2, treating their disappearance as deletions occurring within the observed time window. Alongside deleted posts, the subset of posts retained across both collections is isolated to assess overall dataset consistency.
+This section identifies posts present in Dataset 1 that are absent from
+Dataset 2, treating their disappearance as deletions occurring within
+the observed time window. Alongside deleted posts, the subset of posts
+retained across both collections is isolated to assess overall dataset
+consistency.
 
-Several quality indicators are derived from this comparison: the proportion of retained content, the share of data loss, and where a valid date range is provided; the average number of posts removed per day and the corresponding daily removal rate relative to the original dataset size. These metrics collectively offer a quantitative basis for evaluating the temporal stability of the collected data before proceeding to content-level analysis. In our artificial example, the consistency is 66.7%. The data loss is 33.3% with a daily removal of 3.3 posts per day and a daily removal rate of 1.11% of total posts per day within one month.
+Several quality indicators are derived from this comparison: the
+proportion of retained content, the share of data loss, and where a
+valid date range is provided; the average number of posts removed per
+day and the corresponding daily removal rate relative to the original
+dataset size. These metrics collectively offer a quantitative basis for
+evaluating the temporal stability of the collected data before
+proceeding to content-level analysis. In our artificial example, the
+consistency is 66.7%. The data loss is 33.3% with a daily removal of 3.3
+posts per day and a daily removal rate of 1.11% of total posts per day
+within one month.
 
 ```{r message=FALSE, warning=FALSE}
 # Define removed and remaining posts correctly
-removed_posts <- data1 %>% filter(!(.data[[id_col_1]] %in% data2[[id_col_2]]))
-remaining_posts <- data2 %>% filter(.data[[id_col_2]] %in% intersect(data1[[id_col_1]], data2[[id_col_2]]))
+removed_posts <- data1 %>% filter(!(!!sym(id_col_1) %in% data2[[id_col_2]]))
+remaining_posts <- data1 %>% filter(!!sym(id_col_1) %in% data2[[id_col_2]])
 
 # Quality indicators
 days <- as.numeric(difftime(date_2, date_1, units = "days"))
@@ -289,7 +396,9 @@ cat(output_text)
 
 #### 3.1.1 Word Frequency
 
-The most frequently occurring terms are extracted separately from removed and remaining posts, providing an initial lexical overview of what characterises each subset.
+The most frequently occurring terms are extracted separately from
+removed and remaining posts, providing an initial lexical overview of
+what characterises each subset.
 
 ```{r message=FALSE, warning=FALSE}
 # Top words in Removed posts
@@ -314,11 +423,14 @@ highchart() %>%
                 color = "#4CAF50", showInLegend = FALSE) %>%
   hc_exporting(enabled = TRUE)
 ```
-In the removed posts, the most frequently occurring term is *just* (34 times), followed
-by *new* (18) and *find* (9). Other recurring terms include *change*, *get*, *know*,
-*life*, *month*, *nature*, and *sleep* (each appearing 6-7 times). The lexical profile
+In the removed posts, the most frequently occurring term is *find* (9 times), followed
+by *change* (7). Other recurring terms include *life*, *sleep*, *month*, and *nature*
+(each appearing 6 times), and *home*, *year*, *grocery*, and *attempt* (5 times each).
+Terms such as *company*, *time*, *start*, *minute*, *favorite*, *purchase*, *completely*,
+*make*, *real*, and *worth* follow with 4 occurrences each. The lexical profile
 suggests that removed content was largely centred around everyday personal experiences
 and routine observations.
+
 ```{r message=FALSE, warning=FALSE}
 # Top words in Remaining posts
 cleaned_remaining <- text_processor$clean(remaining_posts$text, use_stem = FALSE, use_lemma = TRUE)
@@ -342,16 +454,21 @@ highchart() %>%
                 color = "#2196F3", showInLegend = FALSE) %>%
   hc_exporting(enabled = TRUE)
 ```
-In the remaining posts, *just* also dominates (60 times), followed by *get* and *new*
-(22 each), *time* (18), and *day* (17). The higher raw frequencies in remaining posts
-are expected given the larger subset size. Shared high-frequency terms across both
-groups indicate no substantial differences and broad topical overlap. At the same time,
-differences in lower-ranked terms may reflect content-specific variation worth
-exploring further. One option is to conduct a keyness analysis, which statistically identifies terms that are over- or under-represented in removed posts relative to remaining posts.
+In the remaining posts, the most frequently occurring term is *time* (19 times), followed
+by *day* (17), *today* (15), *find* (13), and *make* (12). Other recurring terms include
+*work* (11), *life* and *hour* (10 each), and *finish*, *favorite*, *week*, and *year*
+(9 each). The higher raw frequencies in remaining posts are expected given the larger
+subset size. Several high-frequency terms, such as *find*, *life*, *make*, *time*,
+*favorite*, and *year*, also appear among the top terms in the removed posts, indicating
+broad topical overlap between the two groups. At the same time, differences in lower-ranked
+terms may reflect content-specific variation worth exploring further. One option is to conduct a keyness analysis, which statistically identifies terms that are over- or under-represented in removed posts relative to remaining posts.
 
 #### 3.1.2 Keyness Analysis
 
-Keyness analysis identifies terms that are statistically over- or under-represented in removed posts relative to remaining posts, using log-likelihood as the significance threshold and effect size (ELL) as the primary measure of practical importance.
+Keyness analysis identifies terms that are statistically over- or
+under-represented in removed posts relative to remaining posts, using
+log-likelihood as the significance threshold and effect size (ELL) as
+the primary measure of practical importance.
 
 ```{r message=FALSE, warning=FALSE}
 # Keyness analyzer using KeynessMeasures package
@@ -495,11 +612,27 @@ p(
 )
 )
 ```
-The keyness analysis identifies *purchase*, *completely*, *email*, *sleep*, and *tweet* as statistically overrepresented in removed posts, pointing towards transactional and platform-referential language. In contrast, *work*, *week*, *anyone*, *apartment*, and *old* are more characteristic of remaining posts, reflecting everyday social and domestic topics. All terms exceed the log-likelihood threshold of 3.84, indicating that these differences are statistically meaningful rather than artefacts of sampling variation. Still, it must be noted that even very small differences can become statistically significant when the sample size is large. Therefore, also the effect size should be considered. As the ELL values are relatively low (all below 0.1), the practical significance of these differences is modest, suggesting that while certain lexical patterns are more prevalent in one group, the overall content remains broadly similar across removed and remaining posts.
+The keyness analysis identifies *purchase*, *completely*, *email*,
+*sleep*, and *tweet* as statistically overrepresented in removed posts,
+pointing towards transactional and platform-referential language. In
+contrast, *work*, *week*, *apartment*, *today*, and *old* are more
+characteristic of remaining posts, reflecting everyday social and
+domestic topics. All terms exceed the log-likelihood threshold of 3.84,
+indicating that these differences are statistically meaningful rather
+than artefacts of sampling variation. Still, it must be noted that even
+very small differences can become statistically significant when the
+sample size is large. Therefore, also the effect size should be
+considered. As the ELL values are relatively low (all below 0.1), the
+practical significance of these differences is modest, suggesting that
+while certain lexical patterns are more prevalent in one group, the
+overall content remains broadly similar across removed and remaining
+posts.
 
 #### 3.1.3 Sentiment Analysis
 
-Sentiment scores are computed and classified as negative, neutral, or positive for both removed and remaining posts, with the highest-scoring posts at both extremes surfaced for qualitative inspection.
+Sentiment scores are computed and classified as negative, neutral, or
+positive for both removed and remaining posts, with the highest-scoring
+posts at both extremes surfaced for qualitative inspection.
 
 ```{r message=FALSE, warning=FALSE}
 # Optimized sentiment distribution with chunking
@@ -507,17 +640,19 @@ get_sentiment_distribution <- function(text_vector) {
   if (is.null(text_vector) || length(text_vector) == 0) {
     return(data.frame(
       category = c("Negative", "Neutral", "Positive"),
-      percentage = c(0, 0, 0)
+      percentage = c(0, 100, 0)
     ))
   }
 
   chunk_size <- 500
   chunks <- split(text_vector, ceiling(seq_along(text_vector)/chunk_size))
+  
+  results <- lapply(chunks, function(chunk) {
+    sentences <- get_sentences(chunk)
+    sentiment(sentences)
+  })
 
-  all_scores <- unlist(lapply(chunks, function(chunk) {
-    sentences <- sentimentr::get_sentences(chunk)
-    sentimentr::sentiment(sentences)$sentiment
-  }))
+  all_scores <- unlist(lapply(results, function(x) x$sentiment)) 
 
   category <- cut(all_scores,
                   breaks = c(-Inf, -0.01, 0.01, Inf),
@@ -536,32 +671,108 @@ get_sentiment_distribution <- function(text_vector) {
 
 ```{r message=FALSE, warning=FALSE}
 # Sentiment for Removed posts
-sent_removed <- get_sentiment_distribution(removed_posts$text)
+text_data <- removed_posts$text
 
-highchart() %>%
-  hc_chart(type = "column") %>%
-  hc_title(text = "Sentiment Distribution: Removed Posts") %>%
-  hc_xAxis(categories = c("Negative", "Neutral", "Positive")) %>%
-  hc_yAxis(title = list(text = "Percentage"), labels = list(format = "{value}%")) %>%
-  hc_add_series(name = "Removed Posts", data = sent_removed$percentage, color = "#4CAF50") %>%
-  hc_tooltip(pointFormat = "<b>{point.category}</b>: {point.y:.1f}%") %>%
-  hc_plotOptions(column = list(pointPadding = 0.1, groupPadding = 0.1)) %>%
-  hc_exporting(enabled = TRUE)
+scores <- function(text_data) {
+  s <- sentimentr::sentiment_by(text_data)$ave_sentiment
+  neg_count <- sum(s < 0, na.rm = TRUE)
+  neu_count <- sum(s == 0, na.rm = TRUE)
+  pos_count <- sum(s > 0, na.rm = TRUE)
+  total <- length(s)
+
+  if (total == 0) return(NULL)
+
+  list(
+    pct = c(neg_count / total * 100, neu_count / total * 100, pos_count / total * 100),
+    total = total
+  )
+}
+
+data <- scores(text_data)
+
+if (!is.null(data)) {
+  pct <- data$pct
+  total <- data$total
+
+  highchart() %>%
+    hc_chart(type = "column") %>%
+    hc_title(text = "Sentiment Distribution: Removed Posts") %>%
+    hc_xAxis(
+      categories = c("Negative", "Neutral", "Positive"),
+      title = list(text = NULL)
+    ) %>%
+    hc_yAxis(
+      title = list(text = "Percentage"),
+      labels = list(format = "{value}%"),
+      min = 0,
+      max = 100
+    ) %>%
+    hc_add_series(
+      name = "Removed Posts",
+      data = pct,
+      color = "#4CAF50"
+    ) %>%
+    hc_tooltip(pointFormat = "<b>{point.category}</b>: {point.y:.1f}%") %>%
+    hc_plotOptions(column = list(pointPadding = 0.1, groupPadding = 0.1)) %>%
+    hc_exporting(enabled = TRUE)
+}
 ```
 
 ```{r message=FALSE, warning=FALSE}
 # Sentiment for Remaining posts
-sent_remaining <- get_sentiment_distribution(remaining_posts$text)
+text_data <- remaining_posts$text
 
-highchart() %>%
-  hc_chart(type = "column") %>%
-  hc_title(text = "Sentiment Distribution: Remaining Posts") %>%
-  hc_xAxis(categories = c("Negative", "Neutral", "Positive")) %>%
-  hc_yAxis(title = list(text = "Percentage"), labels = list(format = "{value}%")) %>%
-  hc_add_series(name = "Remaining Posts", data = sent_remaining$percentage, color = "#2196F3") %>%
-  hc_tooltip(pointFormat = "<b>{point.category}</b>: {point.y:.1f}%") %>%
-  hc_plotOptions(column = list(pointPadding = 0.1, groupPadding = 0.1)) %>%
-  hc_exporting(enabled = TRUE)
+scores <- function(text_data) {
+  s <- sentimentr::sentiment_by(text_data)$ave_sentiment
+  neg_count <- sum(s < 0, na.rm = TRUE)
+  neu_count <- sum(s == 0, na.rm = TRUE)
+  pos_count <- sum(s > 0, na.rm = TRUE)
+  total <- length(s)
+
+  if (total == 0) return(NULL)
+
+  list(
+    pct = c(
+      neg_count / total * 100,
+      neu_count / total * 100,
+      pos_count / total * 100
+    ),
+    total = total
+  )
+}
+
+data <- scores(text_data)
+
+if (!is.null(data)) {
+  pct <- data$pct
+  total <- data$total
+
+  highchart() %>%
+    hc_chart(type = "column") %>%
+    hc_title(text = "Sentiment Distribution: Remaining Posts") %>%
+    hc_xAxis(
+      categories = c("Negative", "Neutral", "Positive"),
+      title = list(text = NULL)
+    ) %>%
+    hc_yAxis(
+      title = list(text = "Percentage"),
+      labels = list(format = "{value}%"),
+      min = 0,
+      max = 100
+    ) %>%
+    hc_add_series(
+      name = "Remaining Posts",
+      data = pct,
+      color = "#2196F3"
+    ) %>%
+    hc_tooltip(
+      pointFormat = "<b>{point.category}</b>: {point.y:.1f}%"
+    ) %>%
+    hc_plotOptions(
+      column = list(pointPadding = 0.1, groupPadding = 0.1)
+    ) %>%
+    hc_exporting(enabled = TRUE)
+}
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -600,17 +811,39 @@ output_text <- paste0(
 
 cat(output_text)
 ```
-Among removed posts, approximately 42.6% were classified as positive, 39.8% as neutral,
-and 17.6% as negative. The distribution of remaining posts follows a closely comparable
-pattern, with 41.2% positive, 41.5% neutral, and 17.3% negative. Across both subsets,
-positive and neutral content collectively responsible for over 80% of posts, while negative
-content remains a minor proportion in each case. This synthetic example suggests that deleted posts do not exhibit a markedly different sentiment profile from the content that persists, indicating that removal may not be systematically associated with affective tone. If removed posts had a higher proportion of negative sentiment, this could suggest that users or platform moderation systems selectively removed more negatively valenced content. We argue that sentiment differences should be interpreted case by case, so we do not propose a generalizable threshold for what constitutes a meaningful difference in sentiment distribution. Instead, researchers should consider the specific context of their data and research questions when evaluating sentiment differences between removed and remaining posts.
-
+Among removed posts, approximately 71.0% were classified as positive, 24.0% as negative,
+and 5.0% as neutral. The distribution of remaining posts follows a closely comparable
+pattern, with 65.0% positive, 26.5% negative, and 8.5% neutral. Across both subsets,
+positive content clearly dominates, while neutral content remains a small proportion in
+each case. Removed posts are slightly more positive (+6.0 percentage points) and slightly
+less negative (-2.5 points) than remaining posts, but these differences are small. This synthetic example suggests that deleted posts do not exhibit a markedly different sentiment profile from the content that persists, indicating that removal may not be systematically associated with affective tone. If removed posts had a higher proportion of negative sentiment, this could suggest that users or platform moderation systems selectively removed more negatively valenced content. We argue that sentiment differences should be interpreted case by case, so we do not propose a generalizable threshold for what constitutes a meaningful difference in sentiment distribution. Instead, researchers should consider the specific context of their data and research questions when evaluating sentiment differences between removed and remaining posts.
 
 #### 3.1.4 Topic Modeling
 
-Topic modeling was applied separately to removed posts, remaining posts, and a combined view using Latent Dirichlet Allocation (LDA) [@Blei2003LDA]. LDA is a probabilistic method that treats each document as a mixture of topics and each topic as a distribution over words. In the interactive visualisation, topics appear as circles: well-separated circles indicate distinct themes, while overlapping circles suggest shared vocabulary. It must be noted that LDA has multiple well-known limitations, including sensitivity to hyperparameters, the number of topics, and the quality of input text. Therefore, the results should be interpreted cautiously and in conjunction with other analyses. It should be noted that the default way of how topic modeling is conducted here, might not be optimal for all datasets. Users are encouraged to experiment with different numbers of topics, preprocessing steps, and model parameters to achieve the most meaningful results for their specific data. While topic modeling has the aforementioned limitations, it is often used in computational social science. Therefore, it is important to check for differences between removed and remaining posts, especially since small changes in the data can lead to different topics being discovered.
-Topic modeling results are sensitive to the chosen number of topics (*k*). Instead of using a default value, LDA models are pre-computed here for a range of *k* (adjusted automatically based on dataset size, mirroring the "Number of Topics" slider of the interactive Datcha app), so that the number of topics can be adjusted below without re-running any R code.
+Topic modeling was applied separately to removed posts, remaining posts,
+and a combined view using Latent Dirichlet Allocation (LDA)
+[@Blei2003LDA]. LDA is a probabilistic method that treats each document
+as a mixture of topics and each topic as a distribution over words. In
+the interactive visualisation, topics appear as circles: well-separated
+circles indicate distinct themes, while overlapping circles suggest
+shared vocabulary. It must be noted that LDA has multiple well-known
+limitations, including sensitivity to hyperparameters, the number of
+topics, and the quality of input text. Therefore, the results should be
+interpreted cautiously and in conjunction with other analyses. It should
+be noted that the default way of how topic modeling is conducted here,
+might not be optimal for all datasets. Users are encouraged to
+experiment with different numbers of topics, preprocessing steps, and
+model parameters to achieve the most meaningful results for their
+specific data. While topic modeling has the aforementioned limitations,
+it is often used in computational social science. Therefore, it is
+important to check for differences between removed and remaining posts,
+especially since small changes in the data can lead to different topics
+being discovered. Topic modeling results are sensitive to the chosen
+number of topics (*k*). Instead of using a default value, LDA models are
+pre-computed here for a range of *k* (adjusted automatically based on
+dataset size, mirroring the "Number of Topics" slider of the interactive
+Datcha app), so that the number of topics can be adjusted below without
+re-running any R code.
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 MAX_DOCS_FOR_TOPIC_MODELING <- 8000
@@ -798,33 +1031,41 @@ ojs_static_define(
 )
 ```
 
-Use the slider and dropdown below to choose the number of topics (*k*) and the dataset to inspect - matching the "Number of Topics" and "Show Topics For" controls of the interactive Datcha app. All k values are pre-computed, so the visualization updates instantly. To see a topic's top terms, **click on its circle**, then **try moving the λ (lambda) slider** to see how it changes the term ranking.
+Use the slider and dropdown below to choose the number of topics (*k*)
+and the dataset to inspect - matching the "Number of Topics" and "Show
+Topics For" controls of the interactive Datcha app. All k values are
+pre-computed, so the visualization updates instantly. To see a topic's
+top terms, **click on its circle**, then **try moving the λ (lambda)
+slider** to see how it changes the term ranking.
 
-```{ojs}
-//| echo: false
-viewof num_topics_deletion = Inputs.range(
-  [topic_k_min_ojs, topic_k_max_ojs],
-  {value: topic_k_min_ojs, step: topic_k_step_ojs, label: "Number of Topics"}
-)
+```{=html}
+<label>Number of Topics <input id="k1" type="number" min="3" max="15" value="3" oninput="show(1)"></label>
+<label>Show Topics For <select id="s1" onchange="show(1)"><option value="deletion/ldavis_removed">Removed Posts</option><option value="deletion/ldavis_remaining">Remaining Posts</option><option value="deletion/ldavis_combined">Combined View</option></select></label>
+<iframe id="f1" width="100%" height="850" style="border:none"></iframe>
+<script>
+function show(n) { document.getElementById("f" + n).src = "https://kodaqs-toolbox.gesis.org/github.com/kunjanshah0811/Datcha_quarto/index/topic_models_datafiles/" + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
+show(1);
+</script>
 ```
 
-```{ojs}
-//| echo: false
-viewof topic_dataset_deletion = Inputs.select(
-  deletion_topic_choices_ojs,
-  {label: "Show Topics For"}
-)
-```
+When no topic is selected, terms are ranked by *saliency*, which
+combines a word's overall frequency with how strongly it discriminates
+between topics. When a topic is selected, terms are ranked by
+*relevance*. The slider parameter λ controls this ranking: at λ = 1,
+terms are ordered purely by their probability within the topic, which
+favours frequent but often generic words; at λ = 0, terms are ordered by
+how exclusive they are to the topic. Values around λ ≈ 0.6 typically
+offer the best balance for interpreting topics. The combined view allows
+a comparative assessment of whether removed and remaining posts occupy
+similar or divergent thematic spaces.
 
-```{ojs}
-//| echo: false
-html`<iframe src="${deletion_topic_folders_ojs[topic_dataset_deletion]}_k${num_topics_deletion}/index.html" width="100%" height="850px" style="border:none; margin-bottom:40px;"></iframe>`
-```
-
-When no topic is selected, terms are ranked by *saliency*, which combines a word's overall frequency with how strongly it discriminates between topics. When a topic is selected, terms are ranked by *relevance*. The slider parameter λ controls this ranking: at λ = 1, terms are ordered purely by their probability within the topic, which favours frequent but often generic words; at λ = 0, terms are ordered by how exclusive they are to the topic. Values around λ ≈ 0.6 typically offer the best balance for interpreting topics. The combined view allows a comparative assessment of whether removed and remaining posts occupy similar or divergent thematic spaces.
-
-When inspecting the intertopic distance maps, we observe both differences and similarities in topic positions. When choosing the 5-topic solution, most modeled topics cluster around frequently used terms such as "just." Substantial deviations are rare. The only topic where "just" is not among the most prevalent terms is topic 2 of the remaining-data model, where "day," "try," and "good" are most common.
-
+When inspecting the intertopic distance maps, we observe both differences and
+similarities in topic positions. When choosing the 5-topic solution, most modeled
+topics are well separated, with only topics 1 and 5 of the remaining-data model
+overlapping. Across the models, topics cluster around frequently used terms such as
+"find," "life," and "change" in the removed posts, and "store," "day," "time," and
+"today" in the remaining posts, while "find," "back," "change," and "favorite" lead in
+the combined view. Substantial deviations are rare.
 
 ### 3.2 Data Addition
 
@@ -832,7 +1073,8 @@ This section identifies posts present in Dataset 2 that were absent from Dataset
 
 ```{r message=FALSE, warning=FALSE}
 # Summary Statistics for Data Addition
-original_posts <- data2 %>% filter(.data[[id_col_2]] %in% matched_ids)
+original_posts <- data2 %>% filter(!!sym(id_col_2) %in% data1[[id_col_1]])
+added_posts <- data2 %>% filter(!(!!sym(id_col_2) %in% data1[[id_col_1]]))
 
 added_count    <- nrow(added_posts)
 original_count <- nrow(original_posts)   # no () - plain data frame, not a reactive
@@ -860,7 +1102,9 @@ cat(output_text)
 
 #### 3.2.1 Word Frequency
 
-The most frequently occurring terms are extracted from added and original posts, providing an initial lexical overview of what characterises each subset.
+The most frequently occurring terms are extracted from added and
+original posts, providing an initial lexical overview of what
+characterises each subset.
 
 ```{r message=FALSE, warning=FALSE}
 # Top words in Added posts
@@ -886,15 +1130,18 @@ highchart() %>%
   hc_exporting(enabled = TRUE)
 
 ```
-Among added posts, the most frequent term is *new* (25 times), followed by *think* (20)
-and a cluster of terms; *check*, *explore*, *highly*, *recommend*, *relate*, *spot*,
-and *today* - each appearing 17 times. Further down, *company*, *good*, *plan*, *relax*,
-and *weekend* occur 13 times each. The lexical profile of added posts suggests a
+Among added posts, the most frequent terms form a cluster of *check*, *explore*, *highly*,
+*recommend*, *relate*, *spot*, and *today* - each appearing 17 times. Further down,
+*company*, *good*, *plan*, *relax*, and *weekend* occur 13 times each, followed by *day*,
+*happiness*, *make*, *stop*, *think*, *afternoon*, *spend*, *totally*, and *weekendvibes*
+with 11 occurrences each. The lexical profile of added posts suggests a
 notably discovery and recommendation-oriented tone, with terms pointing toward
 exploratory and evaluative content.
+
 ```{r message=FALSE, warning=FALSE}
 # Define original posts (posts present in Dataset 1 and still in Dataset 2)
-original_posts <- data2 %>% filter(.data[[id_col_2]] %in% intersect(data1[[id_col_1]], data2[[id_col_2]]))
+original_posts <- data2 %>%
+  filter(.data[[id_col_2]] %in% intersect(data1[[id_col_1]], data2[[id_col_2]]))
 
 # Top words in Original posts
 cleaned_original <- text_processor$clean(original_posts$text, use_stem = FALSE, use_lemma = TRUE)
@@ -918,13 +1165,16 @@ highchart() %>%
                 color = "#2196F3", showInLegend = FALSE) %>%
   hc_exporting(enabled = TRUE)
 ```
-In original posts, *just* dominates (60 times), followed by *get* and *new* (22 each)
-and *time* (18). Compared to added posts, original posts reflect more general,
-everyday language with less directional or evaluative character. Still, we find some overlap in high-frequency terms, which appears prominently in both subsets (e.g.new, day, today, good). This suggests that while added posts introduce new content, they also share some lexical commonality with existing posts.
+In original posts, *time* is the most frequent term (18 times), followed by *day* (17),
+*today* (15), *find* (13), and *make* (12). Compared to added posts, original posts reflect more general,
+everyday language with less directional or evaluative character. Still, we find some overlap in high-frequency terms, which appears prominently in both subsets (e.g. today, day, make). This suggests that while added posts introduce new content, they also share some lexical commonality with existing posts.
 
 #### 3.2.2 Keyness Analysis
 
-Keyness analysis identifies terms that are statistically over- or under-represented in added posts relative to original posts, using log-likelihood as the significance threshold and effect size (ELL) as the primary measure of practical importance.
+Keyness analysis identifies terms that are statistically over- or
+under-represented in added posts relative to original posts, using
+log-likelihood as the significance threshold and effect size (ELL) as
+the primary measure of practical importance.
 
 ```{r message=FALSE, warning=FALSE}
 keyness_analyzer_add <- list(
@@ -1063,18 +1313,20 @@ div(style = "margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius
 )
 ```
 Terms statistically overrepresented in added posts include *check*, *relate*, *explore*,
-*spot*, and *think*, all with high log-likelihood values and positive log ratios - indicating these words appear far more frequently in added content than would be expected by chance. Conversely, *time*, *find*, *now*, *first*, and *just* are more characteristic of original posts. This pattern reinforces the word frequency findings, suggesting that added posts carry a more active, exploratory vocabulary relative to the baseline corpus.
+*spot*, and *highly*, all with high log-likelihood values and positive log ratios - indicating these words appear far more frequently in added content than would be expected by chance. Conversely, *time*, *find*, *life*, *hour*, and *finish* are more characteristic of original posts. This pattern reinforces the word frequency findings, suggesting that added posts carry a more active, exploratory vocabulary relative to the baseline corpus.
 
 #### 3.2.3 Sentiment Analysis
 
-Sentiment scores are computed and classified as negative, neutral, or positive for both added and original posts, with the most affectively extreme posts surfaced for qualitative inspection.
+Sentiment scores are computed and classified as negative, neutral, or
+positive for both added and original posts, with the most affectively
+extreme posts surfaced for qualitative inspection.
 
 ```{r message=FALSE, warning=FALSE}
 get_sentiment_distribution <- function(text_vector) {
     if (is.null(text_vector)) {
       return(data.frame(
         category = c("Negative", "Neutral", "Positive"),
-        percentage = c(0, 0, 0)
+        percentage = c(0, 100, 0)
       ))
     }
 
@@ -1105,380 +1357,103 @@ get_sentiment_distribution <- function(text_vector) {
 
 ```{r message=FALSE, warning=FALSE}
 # Sentiment for Added posts
-sent_added <- get_sentiment_distribution(added_posts$text)
+text_data <- added_posts$text
 
-highchart() %>%
-  hc_chart(type = "column") %>%
-  hc_title(text = "Sentiment Distribution: Added Posts") %>%
-  hc_xAxis(categories = c("Negative", "Neutral", "Positive")) %>%
-  hc_yAxis(title = list(text = "Percentage"), labels = list(format = "{value}%")) %>%
-  hc_add_series(name = "Added Posts", data = sent_added$percentage, color = "#4CAF50") %>%
-  hc_tooltip(pointFormat = "<b>{point.category}</b>: {point.y:.1f}%") %>%
-  hc_plotOptions(column = list(pointPadding = 0.1, groupPadding = 0.1)) %>%
-  hc_exporting(enabled = TRUE)
-```
-
-```{r message=FALSE, warning=FALSE}
-# Sentiment for Original posts (posts present in Dataset 1)
-sent_original <- get_sentiment_distribution(original_posts$text)
-
-highchart() %>%
-  hc_chart(type = "column") %>%
-  hc_title(text = "Sentiment Distribution: Original Posts") %>%
-  hc_xAxis(categories = c("Negative", "Neutral", "Positive")) %>%
-  hc_yAxis(title = list(text = "Percentage"), labels = list(format = "{value}%")) %>%
-  hc_add_series(name = "Original Posts", data = sent_original$percentage, color = "#2196F3") %>%
-  hc_tooltip(pointFormat = "<b>{point.category}</b>: {point.y:.1f}%") %>%
-  hc_plotOptions(column = list(pointPadding = 0.1, groupPadding = 0.1)) %>%
-  hc_exporting(enabled = TRUE)
-```
-
-```{r message=FALSE, warning=FALSE}
-output_text <- paste0(
-  "**Most positive added post:**\n",
-  get_extreme_text(added_posts$text, "positive"),
-
-  "\n\n**Most negative added post:**\n",
-  get_extreme_text(added_posts$text, "negative"),
-
-  "\n\n**Most positive original post:**\n",
-  get_extreme_text(original_posts$text, "positive"),
-
-  "\n\n**Most negative original post:**\n",
-  get_extreme_text(original_posts$text, "negative")
-)
-
-cat(output_text)
-```
-Among added posts, 58.3% were classified as positive, 39.2% as neutral, and only 2.5%
-as negative; a markedly more positive distribution compared to original posts, which
-show 41.2% positive, 41.5% neutral, and 17.3% negative. The near-absence of negative
-sentiment in added posts is a notable contrast, suggesting that newly introduced content
-within the observation window skews considerably more positive in tone. In such a case, we recommend consider the context of the data and use case, as well as potential biases in user behavior that may influence the sentiment profile of newly added posts. In this artificial example, selecting only one of the two collection points may have introduced a bias toward more positive or negative content, which could be due to various factors such as user engagement patterns, platform moderation, or temporal trends in posting behavior. We recommend being as transparent as possible about the data collection process and considering potential biases when interpreting sentiment differences between added and original posts.
-
-#### 3.2.4 Topic Modeling
-As in the Data Deletion section, LDA models are pre-computed for a range of *k* (adjusted automatically based on dataset size), so the number of topics can be adjusted below without re-running any R code.
-
-```{r message=FALSE, warning=FALSE, results='hide'}
-# Base output directory for addition-section topic model visualizations
-addition_vis_base <- "topic_models_datafiles/addition"
-dir.create(addition_vis_base, recursive = TRUE, showWarnings = FALSE)
-
-# Decide k range and step based on dataset size
-n_docs_addition <- nrow(added_posts)
-if (n_docs_addition < 500) {
-  # Small dataset: finer steps, lower ceiling
-  topic_k_range_addition <- seq(3, 15, by = 1)
-} else {
-  # Large dataset: coarser steps, higher ceiling
-  topic_k_range_addition <- seq(5, 25, by = 5)
-}
-
-# topic_k_*_addition are exported to OJS after this chunk below
-
-topicmodels_json_ldavis_safe <- function(fitted, original_texts, dtm) {
-  valid_rows <- which(rowSums(as.matrix(dtm)) > 0)
-  phi    <- posterior(fitted)$terms %>% as.matrix()
-  theta  <- posterior(fitted)$topics[valid_rows, , drop = FALSE]
-  vocab  <- colnames(phi)
-
-  cleaned_valid <- original_texts[valid_rows]
-  doc_length <- vapply(cleaned_valid, function(x) stringi::stri_count(x, regex = "\\S+"), integer(1))
-  term_freq  <- colSums(as.matrix(dtm))
-
-  tryCatch({
-    LDAvis::createJSON(phi = phi, theta = theta, vocab = vocab,
-                       doc.length = doc_length, term.frequency = term_freq,
-                       mds.method = stats::cmdscale)
-  }, error = function(e) {
-    LDAvis::createJSON(phi = phi, theta = theta, vocab = vocab,
-                       doc.length = doc_length, term.frequency = term_freq,
-                       mds.method = function(x) prcomp(x)$x[, 1:2])
-  })
-}
-
-# Cleans a dataset and builds a document-term matrix ready for LDA,
-# or returns ok = FALSE with a reason if the dataset is not suitable
-prepare_topic_dtm_addition <- function(dataset) {
-  if (nrow(dataset) > 8000) {
-    return(list(ok = FALSE, reason = "Too many documents for topic modeling."))
-  }
-  if (nrow(dataset) < 10 || all(is.na(dataset$text) | trimws(dataset$text) == "")) {
-    return(list(ok = FALSE, reason = "Not enough meaningful documents."))
-  }
-
-  cleaned <- text_processor$clean(dataset$text, use_stem = FALSE, use_lemma = TRUE)
-  valid_idx <- which(nzchar(trimws(cleaned)))
-
-  if (length(valid_idx) < 10) {
-    return(list(ok = FALSE, reason = "Too few documents after cleaning."))
-  }
-
-  cleaned_valid <- cleaned[valid_idx]
-
-  corpus <- VCorpus(VectorSource(cleaned_valid))
-  dtm <- DocumentTermMatrix(corpus)
-  dtm <- dtm[rowSums(as.matrix(dtm)) > 0, ]
-
-  if (nrow(dtm) < 8 || ncol(dtm) < 5) {
-    return(list(ok = FALSE, reason = "Insufficient terms/documents for LDA."))
-  }
-
-  list(ok = TRUE, dtm = dtm, cleaned_valid = cleaned_valid)
-}
-
-# Portable: resolves the LDAvis asset folder on any machine
-asset_source <- system.file("htmljs", package = "LDAvis")
-
-# Fits an LDA model for every k in k_range and writes one LDAvis folder per
-# k (folder_prefix_k<k>). Pre-computing all k values lets the slider below
-# switch between results client-side, without a running R/Shiny session
-generate_topic_models_for_range_add <- function(dataset, dataset_name, folder_prefix, k_range) {
-
-  cat("**", dataset_name, "**\n\n")
-
-  prep <- prepare_topic_dtm_addition(dataset)
-  if (!prep$ok) {
-    cat(prep$reason, "\n\n")
-    return(FALSE)
-  }
-
-  for (k in k_range) {
-
-    lda_model <- tryCatch(
-      LDA(prep$dtm, k = k, control = list(seed = 1234)),
-      error = function(e) NULL
-    )
-    if (is.null(lda_model)) next
-
-    json <- topicmodels_json_ldavis_safe(lda_model, prep$cleaned_valid, prep$dtm)
-
-    vis_dir <- paste0(folder_prefix, "_k", k)
-    dir.create(vis_dir, recursive = TRUE, showWarnings = FALSE)
-
-    if (dir.exists(asset_source)) {
-      file.copy(file.path(asset_source, "lda.css"),   file.path(vis_dir, "lda.css"),   overwrite = TRUE)
-      file.copy(file.path(asset_source, "ldavis.js"), file.path(vis_dir, "ldavis.js"), overwrite = TRUE)
-      file.copy(file.path(asset_source, "d3.v3.js"),  file.path(vis_dir, "d3.v3.js"),  overwrite = TRUE)
-    }
-
-    LDAvis::serVis(json, out.dir = vis_dir, open.browser = FALSE, selfcontained = TRUE)
-
-    html_file <- file.path(vis_dir, "index.html")
-    if (file.exists(html_file)) {
-      html_content <- readLines(html_file, warn = FALSE) |> paste(collapse = "\n")
-      html_content <- gsub('src="/', 'src="', html_content, fixed = TRUE)
-      html_content <- gsub('href="/', 'href="', html_content, fixed = TRUE)
-      writeLines(html_content, html_file)
-    }
-  }
-
-  cat("Topic models pre-computed for k =", min(k_range), "to", max(k_range), "\n\n")
-  TRUE
-}
-
-addition_added_ok    <- generate_topic_models_for_range_add(added_posts,    "Added Posts",    file.path(addition_vis_base, "ldavis_added"),    topic_k_range_addition)
-addition_original_ok <- generate_topic_models_for_range_add(original_posts, "Original Posts", file.path(addition_vis_base, "ldavis_original"), topic_k_range_addition)
-addition_combined_ok <- generate_topic_models_for_range_add(
-  bind_rows(added_posts %>% mutate(group = "added"),
-            original_posts %>% mutate(group = "original")),
-  "Combined View (Added + Original)",
-  file.path(addition_vis_base, "ldavis_combined_add"),
-  topic_k_range_addition
-)
-
-addition_topic_choices <- c(
-  if (isTRUE(addition_added_ok))    "Added Posts",
-  if (isTRUE(addition_original_ok)) "Original Posts",
-  if (isTRUE(addition_combined_ok)) "Combined View (Added + Original)"
-)
-
-addition_topic_folders <- as.list(c(
-  "Added Posts"                      = file.path(addition_vis_base, "ldavis_added"),
-  "Original Posts"                   = file.path(addition_vis_base, "ldavis_original"),
-  "Combined View (Added + Original)" = file.path(addition_vis_base, "ldavis_combined_add")
-)[addition_topic_choices])
-
-```
-
-```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
-ojs_static_define(
-  topic_k_min_addition_ojs   = min(topic_k_range_addition),
-  topic_k_max_addition_ojs   = max(topic_k_range_addition),
-  topic_k_step_addition_ojs  = diff(topic_k_range_addition)[1],
-  addition_topic_choices_ojs = addition_topic_choices,
-  addition_topic_folders_ojs = addition_topic_folders
-)
-```
-
-Use the slider and dropdown below to choose the number of topics (*k*) and the dataset to inspect - matching the "Number of Topics" and "Show Topics For" controls of the interactive Datcha app. All *k* values are pre-computed, so the visualization updates instantly. **Click a topic circle to see its top terms, then try the λ slider.**
-```{ojs}
-//| echo: false
-viewof num_topics_addition = Inputs.range(
-  [topic_k_min_addition_ojs, topic_k_max_addition_ojs],
-  {value: topic_k_min_addition_ojs, step: topic_k_step_addition_ojs, label: "Number of Topics"}
-)
-```
-
-```{ojs}
-//| echo: false
-viewof topic_dataset_addition = Inputs.select(
-  addition_topic_choices_ojs,
-  {label: "Show Topics For"}
-)
-```
-
-```{ojs}
-//| echo: false
-html`<iframe src="${addition_topic_folders_ojs[topic_dataset_addition]}_k${num_topics_addition}/index.html" width="100%" height="850px" style="border:none; margin-bottom:40px;"></iframe>`
-```
-
-Topic modeling was applied to added posts, original posts, and a combined view using LDA, following the same procedure described in the Data Deletion section. While the deleted posts showed little thematic divergence from remaining posts, the added posts exhibit a more distinct thematic profile, which is different from the original posts. For instance, when using the 5-topic solution, the topics in the added posts are more concerned with discovery, exploration, and recommendation, often connected to free time activities and leisure. This aligns with the word frequency and keyness analyses.
-
-### 3.3 Data Editing
-
-This section examines posts whose content changed between the two collection points. These cases are identified by a shared unique identifier but differing textual content. Edit distance is computed to quantify the magnitude of each modification, offering insight into whether changes were minor corrections or substantial rewrites.
-Summary statistics include mean edit distance (Levenshtein), normalized distance, and the overall edited post ratio are reported to characterise the extent of content modification across matched posts. The ten most heavily edited posts are displayed with inline character-level diff highlighting, allowing direct visual inspection of what changed between the two collection points.
-
-```{r message=FALSE, warning=FALSE}
-# Identify edited posts (same ID, different text)
-edited_posts <- data1 %>%
-  inner_join(data2 %>% select(all_of(id_col_1), text_after = text),
-             by = setNames(id_col_1, id_col_1)) %>%
-  filter(text != text_after,
-         !is.na(text), !is.na(text_after),
-         text != "", text_after != "") %>%
-  rename(text_before = text) %>%
-  mutate(
-    edit_distance = stringdist::stringdist(text_before, text_after, method = "lv"),
-    normalized_distance = edit_distance / pmax(nchar(text_before), nchar(text_after))
-  )
-
-# Summary statistics
-total_matched <- length(matched_ids)
-edited_count  <- nrow(edited_posts)
-
-mean_edit <- if (edited_count > 0) round(mean(edited_posts$edit_distance), 2) else 0
-mean_norm <- if (edited_count > 0) round(mean(edited_posts$normalized_distance), 4) else 0
-edit_ratio <- if (total_matched > 0) round(edited_count / total_matched * 100, 1) else 0
-
-output_text <- paste0(
-  "Editing Statistics\n",
-  "Mean Edit Distance       : 0.13\n",
-  "Mean Normalized Distance : 0.0018\n",
-  "Edited Post Ratio        : 1.5%\n\n",
-  "Number of Edited Posts : ",
-  edited_count,
-  " out of ",
-  total_matched,
-  " matched posts"
-)
-
-cat(output_text)
-```
-In our synthetic data, out of 200 posts matched across both collection points, only 3 were found to have
-different textual content - yielding an edited post ratio of 1.5%, indicating that
-the vast majority of content remained unchanged between the two snapshots.
-
-The mean edit distance of 0.13 reflects the average number of character-level
-changes made per post, suggesting that edits were minimal in absolute terms. The
-mean normalized distance of 0.0018 further contextualizes this figure relative to
-post length, confirming that modifications affected a very small proportion of each
-post's total characters.
-
-```{r message=FALSE, warning=FALSE}
-# Load diffobj CSS (same as original)
-diffobj_css_path <- system.file("www", "diffobj.css", package = "diffobj")
-if (file.exists(diffobj_css_path)) {
-  diff_css <- paste(readLines(diffobj_css_path), collapse = "\n")
-} else {
-  diff_css <- ""
-}
-if (diff_css != "") {
-  tags$style(HTML(diff_css))
-}
-
-# Fixed diff function: unified view in one cell, with clear headers and proper alignment
-apply_diff <- function(text_before, text_after) {
-  html <- as.character(
-    diffChr(text_before, text_after,
-            format = "html",
-            mode = "unified",       # Better alignment for long texts
-            color.mode = "rgb",
-            style = list(html.output = "diff.w.style"),
-            line.limit = 200)       # Prevent overly long output
-  )
-
-  html <- gsub("<div class='diffobj-line'><div class='diffobj-header'>@@.*?@@</div></div>", "", html, perl = TRUE)
-
-  paste0(
-    "<div style='font-family: monospace; font-size: 0.95em; line-height: 1.4; ",
-    "white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; ",
-    "padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9;'>",
-    "<strong>Before → After Changes:</strong><br><br>",
-    html,
-    "</div>"
+scores <- function(text_data) {
+  s <- sentimentr::sentiment_by(text_data)$ave_sentiment
+  
+  neg_count <- sum(s < 0, na.rm = TRUE)
+  neu_count <- sum(s == 0, na.rm = TRUE)
+  pos_count <- sum(s > 0, na.rm = TRUE)
+  total <- length(s)
+  
+  if (total == 0) return(NULL)
+  
+  list(
+    pct = c(
+      neg_count / total * 100,
+      neu_count / total * 100,
+      pos_count / total * 100
+    ),
+    total = total
   )
 }
 
-# Prepare top 10 most edited posts
-most_edited <- edited_posts %>%
-  arrange(desc(edit_distance)) %>%
-  slice_head(n = 10) %>%
-  select(ID = !!sym(id_col_1), edit_distance, normalized_distance, text_before, text_after) %>%
-  mutate(
-    Diff_View = mapply(apply_diff, text_before, text_after)
-  )
+data <- scores(text_data)
 
-# Display clean, aligned table with highlighted diffs
-datatable(
-  most_edited %>%
-    select(ID, Diff_View, edit_distance, Normalized_Distance = normalized_distance),
-  caption = "Top 10 Most Edited Posts (with Highlighted Changes)",
-  escape = FALSE,
-  rownames = FALSE,
-  options = list(
-    pageLength = 10,
-    autoWidth = TRUE,
-    scrollX = TRUE,
-    columnDefs = list(
-      list(width = "80px", targets = 0),           # ID
-      list(width = "65%", targets = 1),            # Diff view takes most space
-      list(width = "100px", targets = c(2, 3))     # Distances
-    )
-  ),
-  class = "cell-border stripe hover compact"
-)
+if (!is.null(data)) {
+  pct <- data$pct
+  total <- data$total
+  
+  highchart() %>%
+    hc_chart(type = "column") %>%
+    hc_title(text = "Sentiment Distribution: Added Posts") %>%
+    hc_xAxis(
+      categories = c("Negative", "Neutral", "Positive"),
+      title = list(text = NULL)
+    ) %>%
+    hc_yAxis(
+      title = list(text = "Percentage"),
+      labels = list(format = "{value}%"),
+      min = 0,
+      max = 100
+    ) %>%
+    hc_add_series(
+      name = "Added Posts",
+      data = pct,
+      color = "#4CAF50"
+    ) %>%
+    hc_tooltip(
+      pointFormat = "<b>{point.category}</b>: {point.y:.1f}%"
+    ) %>%
+    hc_plotOptions(
+      column = list(pointPadding = 0.1, groupPadding = 0.1)
+    ) %>%
+    hc_exporting(enabled = TRUE)
+}
 ```
-Inspecting the three edited posts directly reveals the nature of these changes.
-Post 1 shows a hashtag substitution - *#fitness* was replaced with *#spritual* -
-while *#motivation* was retained, indicating a deliberate retagging rather than
-content revision (edit distance: 17, normalized: 0.26). Post 200 reflects a minor
-structural edit in which the hashtag *#timing* was removed from an otherwise
-unchanged post (edit distance: 8, normalized: 0.09). Post 2 presents the most
-subtle change - the dollar sign preceding *7* was removed, leaving the numerical
-value intact (edit distance: 1, normalized: 0.01). Collectively, the edits appear
-to be surface-level adjustments to metadata and formatting rather than substantive
-content revisions.
 
-# 4. Discussion
-In this tutorial, we used an artificial data set to apply the code of the Datcha Shiny App. Instead of just showcasing the App itself, we used this tutorial to demonstrate the actual code of Datcha. The main advantage of this is that some of the limitations of the Datcha App can be avoided when running the analysis locally. In our example case analysis, we examined 200 matched posts collected 30 days apart, tracking what
-changed, what disappeared, and what was newly added over that period. One third of
-the original posts were no longer present in the second snapshot, while a comparable
-volume of new content had appeared - signalling that the platform's content landscape
-shifted meaningfully within a single month. Edited posts were rare and minor, mostly
-limited to hashtag adjustments rather than substantive rewrites.
+```{r message=FALSE, warning=FALSE}
+# Sentiment for Original posts
+text_data <- original_posts$text
 
-The sentiment and lexical profiles of removed and remaining posts were broadly similar,
-suggesting that deletion was not strongly driven by content tone. Added posts, however,
-showed a noticeably more positive and recommendation-oriented character, which may
-reflect organic shifts in user behaviour or platform dynamics during the observation
-window.
+scores <- function(text_data) {
+  s <- sentimentr::sentiment_by(text_data)$ave_sentiment
+  
+  neg_count <- sum(s < 0, na.rm = TRUE)
+  neu_count <- sum(s == 0, na.rm = TRUE)
+  pos_count <- sum(s > 0, na.rm = TRUE)
+  total <- length(s)
+  
+  if (total == 0) return(NULL)
+  
+  list(
+    pct = c(
+      neg_count / total * 100,
+      neu_count / total * 100,
+      pos_count / total * 100
+    ),
+    total = total
+  )
+}
 
-For computational scientists, working with social media data, such a tool serve as a template  to systematically compare social media data regarding its consistency. Because data collected at one point in time may look quite different from
-one collected only weeks later. Before running any analysis,
-it is worth checking how stable the data actually is. Where possible, collecting data at multiple time points
-rather than just two would allow for a more granular understanding of how and when
-content changes occur. While this tool has already mentioned methodological limitations, it is important to note that the analysis is based on a synthetic dataset and may not fully capture the complexities of real-world social media data. The actual limitations of the tool come from methodological reasons, e.g. the use of LDA for topic modeling or a dictionary-based approach for sentiment analysis. However, as the original Shiny App needs efficient computation, these approaches have been considered as a trade-off between speed and accuracy. In practice, users should be aware of these limitations and consider complementary methods or more advanced techniques for deeper analysis. Despite this, we still think that the methods employed can make differences visible because the focus is the comparison of two datasets with the same deterministic method rather than the absolute quality of the analysis. The methods used in this tutorial are not meant to provide a definitive analysis of social media data, but rather to reveal differences between the two data sets is a systematic manner.
+data <- scores(text_data)
 
-# 5. Literature
+if (!is.null(data)) {
+  pct <- data$pct
+  total <- data$total
+  
+  highchart() %>%
+    hc_chart(type = "column") %>%
+    hc_title(text = "Sentiment Distribution: Original Posts") %>%
+    hc_xAxis(
+      categories = c("Negative", "Neutral", "Positive"),
+      title = list(text = NULL)
+    ) %>%
+    hc_yAxis(
+      title = list(text = "Percentage"),
+      labels = list(format = "{value}%"),
+      min = 0,
+      max = 100
+    ) %>%
+    hc_add_series(
