@@ -805,7 +805,7 @@ Use the slider and dropdown below to choose the number of topics (*k*) and the d
 <label>Show Topics For <select id="s1" onchange="show(1)"><option value="deletion/ldavis_removed">Removed Posts</option><option value="deletion/ldavis_remaining">Remaining Posts</option><option value="deletion/ldavis_combined">Combined View</option></select></label>
 <iframe id="f1" width="100%" height="850" style="border:none"></iframe>
 <script>
-function show(n) { document.getElementById("f" + n).src = "https://gesiscss.github.io/KODAQS2MH-Datcha_quarto/topic_models/" + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
+function show(n) { document.getElementById("f" + n).src = "https://hojjatkamyabi.github.io/KODAQS2MH-Datcha_quarto/topic_models/" + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
 show(1);
 </script>
 ```
