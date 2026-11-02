@@ -800,25 +800,14 @@ ojs_static_define(
 
 Use the slider and dropdown below to choose the number of topics (*k*) and the dataset to inspect - matching the "Number of Topics" and "Show Topics For" controls of the interactive Datcha app. All k values are pre-computed, so the visualization updates instantly. To see a topic's top terms, **click on its circle**, then **try moving the λ (lambda) slider** to see how it changes the term ranking.
 
-```{ojs}
-//| echo: false
-viewof num_topics_deletion = Inputs.range(
-  [topic_k_min_ojs, topic_k_max_ojs],
-  {value: topic_k_min_ojs, step: topic_k_step_ojs, label: "Number of Topics"}
-)
-```
-
-```{ojs}
-//| echo: false
-viewof topic_dataset_deletion = Inputs.select(
-  deletion_topic_choices_ojs,
-  {label: "Show Topics For"}
-)
-```
-
-```{ojs}
-//| echo: false
-html`<iframe src="${deletion_topic_folders_ojs[topic_dataset_deletion]}_k${num_topics_deletion}/index.html" width="100%" height="850px" style="border:none; margin-bottom:40px;"></iframe>`
+```{=html}
+<label>Number of Topics <input id="k1" type="number" min="3" max="15" value="3" oninput="show(1)"></label>
+<label>Show Topics For <select id="s1" onchange="show(1)"><option value="deletion/ldavis_removed">Removed Posts</option><option value="deletion/ldavis_remaining">Remaining Posts</option><option value="deletion/ldavis_combined">Combined View</option></select></label>
+<iframe id="f1" width="100%" height="850" style="border:none"></iframe>
+<script>
+function show(n) { document.getElementById("f" + n).src = "https://gesiscss.github.io/KODAQS2MH-Datcha_quarto/topic_models/" + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
+show(1);
+</script>
 ```
 
 When no topic is selected, terms are ranked by *saliency*, which combines a word's overall frequency with how strongly it discriminates between topics. When a topic is selected, terms are ranked by *relevance*. The slider parameter λ controls this ranking: at λ = 1, terms are ordered purely by their probability within the topic, which favours frequent but often generic words; at λ = 0, terms are ordered by how exclusive they are to the topic. Values around λ ≈ 0.6 typically offer the best balance for interpreting topics. The combined view allows a comparative assessment of whether removed and remaining posts occupy similar or divergent thematic spaces.
@@ -1312,25 +1301,11 @@ ojs_static_define(
 ```
 
 Use the slider and dropdown below to choose the number of topics (*k*) and the dataset to inspect - matching the "Number of Topics" and "Show Topics For" controls of the interactive Datcha app. All *k* values are pre-computed, so the visualization updates instantly. **Click a topic circle to see its top terms, then try the λ slider.**
-```{ojs}
-//| echo: false
-viewof num_topics_addition = Inputs.range(
-  [topic_k_min_addition_ojs, topic_k_max_addition_ojs],
-  {value: topic_k_min_addition_ojs, step: topic_k_step_addition_ojs, label: "Number of Topics"}
-)
-```
-
-```{ojs}
-//| echo: false
-viewof topic_dataset_addition = Inputs.select(
-  addition_topic_choices_ojs,
-  {label: "Show Topics For"}
-)
-```
-
-```{ojs}
-//| echo: false
-html`<iframe src="${addition_topic_folders_ojs[topic_dataset_addition]}_k${num_topics_addition}/index.html" width="100%" height="850px" style="border:none; margin-bottom:40px;"></iframe>`
+```{=html}
+<label>Number of Topics <input id="k2" type="number" min="3" max="15" value="3" oninput="show(2)"></label>
+<label>Show Topics For <select id="s2" onchange="show(2)"><option value="addition/ldavis_added">Added Posts</option><option value="addition/ldavis_original">Original Posts</option><option value="addition/ldavis_combined_add">Combined View (Added + Original)</option></select></label>
+<iframe id="f2" width="100%" height="850" style="border:none"></iframe>
+<script>show(2);</script>
 ```
 
 Topic modeling was applied to added posts, original posts, and a combined view using LDA, following the same procedure described in the Data Deletion section. While the deleted posts showed little thematic divergence from remaining posts, the added posts exhibit a more distinct thematic profile, which is different from the original posts. For instance, when using the 5-topic solution, the topics in the added posts are more concerned with discovery, exploration, and recommendation, often connected to free time activities and leisure. This aligns with the word frequency and keyness analyses.
