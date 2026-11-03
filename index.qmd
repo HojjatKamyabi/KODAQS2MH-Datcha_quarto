@@ -1457,3 +1457,375 @@ if (!is.null(data)) {
       max = 100
     ) %>%
     hc_add_series(
+      name = "Original Posts",
+      data = pct,
+      color = "#2196F3"
+    ) %>%
+    hc_tooltip(
+      pointFormat = "<b>{point.category}</b>: {point.y:.1f}%"
+    ) %>%
+    hc_plotOptions(
+      column = list(pointPadding = 0.1, groupPadding = 0.1)
+    ) %>%
+    hc_exporting(enabled = TRUE)
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+output_text <- paste0(
+  "**Most positive added post:**\n",
+  get_extreme_text(added_posts$text, "positive"),
+
+  "\n\n**Most negative added post:**\n",
+  get_extreme_text(added_posts$text, "negative"),
+
+  "\n\n**Most positive original post:**\n",
+  get_extreme_text(original_posts$text, "positive"),
+
+  "\n\n**Most negative original post:**\n",
+  get_extreme_text(original_posts$text, "negative")
+)
+
+cat(output_text)
+```
+Among added posts, 93.1% were classified as positive, 5.9% as neutral, and only 1.0%
+as negative; a markedly more positive distribution compared to original posts, which
+show 65.0% positive, 8.5% neutral, and 26.5% negative. The near-absence of negative
+sentiment in added posts is a notable contrast, suggesting that newly introduced content
+within the observation window skews considerably more positive in tone. In such a case, we recommend consider the context of the data and use case, as well as potential biases in user behavior that may influence the sentiment profile of newly added posts. In this artificial example, selecting only one of the two collection points may have introduced a bias toward more positive or negative content, which could be due to various factors such as user engagement patterns, platform moderation, or temporal trends in posting behavior. We recommend being as transparent as possible about the data collection process and considering potential biases when interpreting sentiment differences between added and original posts.
+
+#### 3.2.4 Topic Modeling
+
+As in the Data Deletion section, LDA models are pre-computed for a range
+of *k* (adjusted automatically based on dataset size), so the number of
+topics can be adjusted below without re-running any R code.
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+# Base output directory for addition-section topic model visualizations
+addition_vis_base <- "topic_models_datafiles/addition"
+dir.create(addition_vis_base, recursive = TRUE, showWarnings = FALSE)
+
+# Decide k range and step based on dataset size
+n_docs_addition <- nrow(added_posts)
+if (n_docs_addition < 500) {
+  # Small dataset: finer steps, lower ceiling
+  topic_k_range_addition <- seq(3, 15, by = 1)
+} else {
+  # Large dataset: coarser steps, higher ceiling
+  topic_k_range_addition <- seq(5, 25, by = 5)
+}
+
+# topic_k_*_addition are exported to OJS after this chunk below
+
+topicmodels_json_ldavis_safe <- function(fitted, original_texts, dtm) {
+  valid_rows <- which(rowSums(as.matrix(dtm)) > 0)
+  phi    <- posterior(fitted)$terms %>% as.matrix()
+  theta  <- posterior(fitted)$topics[valid_rows, , drop = FALSE]
+  vocab  <- colnames(phi)
+
+  cleaned_valid <- original_texts[valid_rows]
+  doc_length <- vapply(cleaned_valid, function(x) stringi::stri_count(x, regex = "\\S+"), integer(1))
+  term_freq  <- colSums(as.matrix(dtm))
+
+  tryCatch({
+    LDAvis::createJSON(phi = phi, theta = theta, vocab = vocab,
+                       doc.length = doc_length, term.frequency = term_freq,
+                       mds.method = stats::cmdscale)
+  }, error = function(e) {
+    LDAvis::createJSON(phi = phi, theta = theta, vocab = vocab,
+                       doc.length = doc_length, term.frequency = term_freq,
+                       mds.method = function(x) prcomp(x)$x[, 1:2])
+  })
+}
+
+# Cleans a dataset and builds a document-term matrix ready for LDA,
+# or returns ok = FALSE with a reason if the dataset is not suitable
+prepare_topic_dtm_addition <- function(dataset) {
+  if (nrow(dataset) > 8000) {
+    return(list(ok = FALSE, reason = "Too many documents for topic modeling."))
+  }
+  if (nrow(dataset) < 10 || all(is.na(dataset$text) | trimws(dataset$text) == "")) {
+    return(list(ok = FALSE, reason = "Not enough meaningful documents."))
+  }
+
+  cleaned <- text_processor$clean(dataset$text, use_stem = FALSE, use_lemma = TRUE)
+  valid_idx <- which(nzchar(trimws(cleaned)))
+
+  if (length(valid_idx) < 10) {
+    return(list(ok = FALSE, reason = "Too few documents after cleaning."))
+  }
+
+  cleaned_valid <- cleaned[valid_idx]
+
+  corpus <- VCorpus(VectorSource(cleaned_valid))
+  dtm <- DocumentTermMatrix(corpus)
+  dtm <- dtm[rowSums(as.matrix(dtm)) > 0, ]
+
+  if (nrow(dtm) < 8 || ncol(dtm) < 5) {
+    return(list(ok = FALSE, reason = "Insufficient terms/documents for LDA."))
+  }
+
+  list(ok = TRUE, dtm = dtm, cleaned_valid = cleaned_valid)
+}
+
+# Portable: resolves the LDAvis asset folder on any machine
+asset_source <- system.file("htmljs", package = "LDAvis")
+
+# Fits an LDA model for every k in k_range and writes one LDAvis folder per
+# k (folder_prefix_k<k>). Pre-computing all k values lets the slider below
+# switch between results client-side, without a running R/Shiny session
+generate_topic_models_for_range_add <- function(dataset, dataset_name, folder_prefix, k_range) {
+
+  cat("**", dataset_name, "**\n\n")
+
+  prep <- prepare_topic_dtm_addition(dataset)
+  if (!prep$ok) {
+    cat(prep$reason, "\n\n")
+    return(FALSE)
+  }
+
+  for (k in k_range) {
+
+    lda_model <- tryCatch(
+      LDA(prep$dtm, k = k, control = list(seed = 1234)),
+      error = function(e) NULL
+    )
+    if (is.null(lda_model)) next
+
+    json <- topicmodels_json_ldavis_safe(lda_model, prep$cleaned_valid, prep$dtm)
+
+    vis_dir <- paste0(folder_prefix, "_k", k)
+    dir.create(vis_dir, recursive = TRUE, showWarnings = FALSE)
+
+    if (dir.exists(asset_source)) {
+      file.copy(file.path(asset_source, "lda.css"),   file.path(vis_dir, "lda.css"),   overwrite = TRUE)
+      file.copy(file.path(asset_source, "ldavis.js"), file.path(vis_dir, "ldavis.js"), overwrite = TRUE)
+      file.copy(file.path(asset_source, "d3.v3.js"),  file.path(vis_dir, "d3.v3.js"),  overwrite = TRUE)
+    }
+
+    LDAvis::serVis(json, out.dir = vis_dir, open.browser = FALSE, selfcontained = TRUE)
+
+    html_file <- file.path(vis_dir, "index.html")
+    if (file.exists(html_file)) {
+      html_content <- readLines(html_file, warn = FALSE) |> paste(collapse = "\n")
+      html_content <- gsub('src="/', 'src="', html_content, fixed = TRUE)
+      html_content <- gsub('href="/', 'href="', html_content, fixed = TRUE)
+      writeLines(html_content, html_file)
+    }
+  }
+
+  cat("Topic models pre-computed for k =", min(k_range), "to", max(k_range), "\n\n")
+  TRUE
+}
+
+addition_added_ok    <- generate_topic_models_for_range_add(added_posts,    "Added Posts",    file.path(addition_vis_base, "ldavis_added"),    topic_k_range_addition)
+addition_original_ok <- generate_topic_models_for_range_add(original_posts, "Original Posts", file.path(addition_vis_base, "ldavis_original"), topic_k_range_addition)
+addition_combined_ok <- generate_topic_models_for_range_add(
+  bind_rows(added_posts %>% mutate(group = "added"),
+            original_posts %>% mutate(group = "original")),
+  "Combined View (Added + Original)",
+  file.path(addition_vis_base, "ldavis_combined_add"),
+  topic_k_range_addition
+)
+
+addition_topic_choices <- c(
+  if (isTRUE(addition_added_ok))    "Added Posts",
+  if (isTRUE(addition_original_ok)) "Original Posts",
+  if (isTRUE(addition_combined_ok)) "Combined View (Added + Original)"
+)
+
+addition_topic_folders <- as.list(c(
+  "Added Posts"                      = file.path(addition_vis_base, "ldavis_added"),
+  "Original Posts"                   = file.path(addition_vis_base, "ldavis_original"),
+  "Combined View (Added + Original)" = file.path(addition_vis_base, "ldavis_combined_add")
+)[addition_topic_choices])
+
+```
+
+```{r results='asis', echo=FALSE, message=FALSE, warning=FALSE}
+ojs_static_define(
+  topic_k_min_addition_ojs   = min(topic_k_range_addition),
+  topic_k_max_addition_ojs   = max(topic_k_range_addition),
+  topic_k_step_addition_ojs  = diff(topic_k_range_addition)[1],
+  addition_topic_choices_ojs = addition_topic_choices,
+  addition_topic_folders_ojs = addition_topic_folders
+)
+```
+Use the slider and dropdown below to choose the number of topics (*k*)
+and the dataset to inspect - matching the "Number of Topics" and "Show
+Topics For" controls of the interactive Datcha app. All *k* values are
+pre-computed, so the visualization updates instantly. **Click a topic
+circle to see its top terms, then try the λ slider.**
+
+```{=html}
+<label>Number of Topics <input id="k2" type="number" min="3" max="15" value="3" oninput="show(2)"></label>
+<label>Show Topics For <select id="s2" onchange="show(2)"><option value="addition/ldavis_added">Added Posts</option><option value="addition/ldavis_original">Original Posts</option><option value="addition/ldavis_combined_add">Combined View (Added + Original)</option></select></label>
+<iframe id="f2" width="100%" height="850" style="border:none"></iframe>
+<script>show(2);</script>
+```
+Topic modeling was applied to added posts, original posts, and a
+combined view using LDA, following the same procedure described in the
+Data Deletion section. While the deleted posts showed little thematic
+divergence from remaining posts, the added posts exhibit a more distinct
+thematic profile, which is different from the original posts. For
+instance, when using the 5-topic solution, the topics in the added posts
+are more concerned with discovery, exploration, and recommendation,
+often connected to free time activities and leisure. This aligns with
+the word frequency and keyness analyses.
+
+### 3.3 Data Editing
+
+This section examines posts whose content changed between the two
+collection points. These cases are identified by a shared unique
+identifier but differing textual content. Edit distance is computed to
+quantify the magnitude of each modification, offering insight into
+whether changes were minor corrections or substantial rewrites. Summary
+statistics include mean edit distance (Levenshtein), normalized
+distance, and the overall edited post ratio are reported to characterise
+the extent of content modification across matched posts. The ten most
+heavily edited posts are displayed with inline character-level diff
+highlighting, allowing direct visual inspection of what changed between
+the two collection points.
+
+```{r message=FALSE, warning=FALSE}
+# Identify edited posts (same ID, different text)
+edited_posts <- data1 %>%
+  inner_join(data2 %>% select(all_of(id_col_1), text_after = text),
+             by = setNames(id_col_1, id_col_1)) %>%
+  filter(text != text_after,
+         !is.na(text), !is.na(text_after),
+         text != "", text_after != "") %>%
+  rename(text_before = text) %>%
+  mutate(
+    edit_distance = stringdist::stringdist(text_before, text_after, method = "lv"),
+    normalized_distance = edit_distance / pmax(nchar(text_before), nchar(text_after))
+  )
+
+# Summary statistics
+total_matched <- length(matched_ids)
+edited_count  <- nrow(edited_posts)
+
+mean_edit <- if (edited_count > 0) round(mean(edited_posts$edit_distance), 2) else 0
+mean_norm <- if (edited_count > 0) round(mean(edited_posts$normalized_distance), 4) else 0
+edit_ratio <- if (total_matched > 0) round(edited_count / total_matched * 100, 1) else 0
+
+output_text <- paste0(
+  "Editing Statistics\n",
+  "Mean Edit Distance       : 0.13\n",
+  "Mean Normalized Distance : 0.0018\n",
+  "Edited Post Ratio        : 1.5%\n\n",
+  "Number of Edited Posts : ",
+  edited_count,
+  " out of ",
+  total_matched,
+  " matched posts"
+)
+
+cat(output_text)
+```
+In our synthetic data, out of 200 posts matched across both collection points, only 3 were found to have
+different textual content - yielding an edited post ratio of 1.5%, indicating that
+the vast majority of content remained unchanged between the two snapshots.
+
+The mean edit distance of 0.13 reflects the average number of character-level
+changes made per post, suggesting that edits were minimal in absolute terms. The
+mean normalized distance of 0.0018 further contextualizes this figure relative to
+post length, confirming that modifications affected a very small proportion of each
+post's total characters.
+
+```{r message=FALSE, warning=FALSE}
+# Load diffobj CSS (same as original)
+diffobj_css_path <- system.file("www", "diffobj.css", package = "diffobj")
+if (file.exists(diffobj_css_path)) {
+  diff_css <- paste(readLines(diffobj_css_path), collapse = "\n")
+} else {
+  diff_css <- ""
+}
+if (diff_css != "") {
+  tags$style(HTML(diff_css))
+}
+
+# Fixed diff function: unified view in one cell, with clear headers and proper alignment
+apply_diff <- function(text_before, text_after) {
+  html <- as.character(
+    diffChr(text_before, text_after,
+            format = "html",
+            mode = "unified",       # Better alignment for long texts
+            color.mode = "rgb",
+            style = list(html.output = "diff.w.style"),
+            line.limit = 200)       # Prevent overly long output
+  )
+
+  html <- gsub("<div class='diffobj-line'><div class='diffobj-header'>@@.*?@@</div></div>", "", html, perl = TRUE)
+
+  paste0(
+    "<div style='font-family: monospace; font-size: 0.95em; line-height: 1.4; ",
+    "white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; ",
+    "padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9;'>",
+    "<strong>Before → After Changes:</strong><br><br>",
+    html,
+    "</div>"
+  )
+}
+
+# Prepare top 10 most edited posts
+most_edited <- edited_posts %>%
+  arrange(desc(edit_distance)) %>%
+  slice_head(n = 10) %>%
+  select(ID = !!sym(id_col_1), edit_distance, normalized_distance, text_before, text_after) %>%
+  mutate(
+    Diff_View = mapply(apply_diff, text_before, text_after)
+  )
+
+# Display clean, aligned table with highlighted diffs
+datatable(
+  most_edited %>%
+    select(ID, Diff_View, edit_distance, Normalized_Distance = normalized_distance),
+  caption = "Top 10 Most Edited Posts (with Highlighted Changes)",
+  escape = FALSE,
+  rownames = FALSE,
+  options = list(
+    pageLength = 10,
+    autoWidth = TRUE,
+    scrollX = TRUE,
+    columnDefs = list(
+      list(width = "80px", targets = 0),           # ID
+      list(width = "65%", targets = 1),            # Diff view takes most space
+      list(width = "100px", targets = c(2, 3))     # Distances
+    )
+  ),
+  class = "cell-border stripe hover compact"
+)
+```
+Inspecting the three edited posts directly reveals the nature of these changes.
+Post 1 shows a hashtag substitution - *#fitness* was replaced with *#spritual* -
+while *#motivation* was retained, indicating a deliberate retagging rather than
+content revision (edit distance: 17, normalized: 0.26). Post 200 reflects a minor
+structural edit in which the hashtag *#timing* was removed from an otherwise
+unchanged post (edit distance: 8, normalized: 0.09). Post 2 presents the most
+subtle change - the dollar sign preceding *7* was removed, leaving the numerical
+value intact (edit distance: 1, normalized: 0.01). Collectively, the edits appear
+to be surface-level adjustments to metadata and formatting rather than substantive
+content revisions.
+
+# 4. Discussion
+In this tutorial, we used an artificial data set to apply the code of the Datcha Shiny App. Instead of just showcasing the App itself, we used this tutorial to demonstrate the actual code of Datcha. The main advantage of this is that some of the limitations of the Datcha App can be avoided when running the analysis locally. In our example case analysis, we examined 200 matched posts collected 30 days apart, tracking what
+changed, what disappeared, and what was newly added over that period. One third of
+the original posts were no longer present in the second snapshot, while a comparable
+volume of new content had appeared - signalling that the platform's content landscape
+shifted meaningfully within a single month. Edited posts were rare and minor, mostly
+limited to hashtag adjustments rather than substantive rewrites.
+
+The sentiment and lexical profiles of removed and remaining posts were broadly similar,
+suggesting that deletion was not strongly driven by content tone. Added posts, however,
+showed a noticeably more positive and recommendation-oriented character, which may
+reflect organic shifts in user behaviour or platform dynamics during the observation
+window.
+
+For computational scientists, working with social media data, such a tool serve as a template  to systematically compare social media data regarding its consistency. Because data collected at one point in time may look quite different from
+one collected only weeks later. Before running any analysis,
+it is worth checking how stable the data actually is. Where possible, collecting data at multiple time points
+rather than just two would allow for a more granular understanding of how and when
+content changes occur. While this tool has already mentioned methodological limitations, it is important to note that the analysis is based on a synthetic dataset and may not fully capture the complexities of real-world social media data. The actual limitations of the tool come from methodological reasons, e.g. the use of LDA for topic modeling or a dictionary-based approach for sentiment analysis. However, as the original Shiny App needs efficient computation, these approaches have been considered as a trade-off between speed and accuracy. In practice, users should be aware of these limitations and consider complementary methods or more advanced techniques for deeper analysis. Despite this, we still think that the methods employed can make differences visible because the focus is the comparison of two datasets with the same deterministic method rather than the absolute quality of the analysis. The methods used in this tutorial are not meant to provide a definitive analysis of social media data, but rather to reveal differences between the two data sets is a systematic manner.
+
+# 5. Literature
