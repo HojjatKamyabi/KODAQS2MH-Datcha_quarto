@@ -141,61 +141,64 @@ ojs_static_define <- function(...) {
 }
 ```
 
-::: {.content-visible when-format="markdown"}
 ```{=html}
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/htmltools-fill-0.5.8.1/fill.css">
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/proj4js-2.3.15/proj4.js"></script>
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/css/motion.css">
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts-3d.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts-more.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/stock.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/map.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/data.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/exporting.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/offline-exporting.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/drilldown.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/item-series.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/overlapping-datalabels.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/annotations.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/export-data.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/funnel.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/heatmap.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/treemap.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/sankey.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/dependency-wheel.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/organization.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/solid-gauge.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/streamgraph.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/sunburst.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/vector.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/wordcloud.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/xrange.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/tilemap.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/venn.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/gantt.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/timeline.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/parallel-coordinates.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/bullet.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/coloraxis.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/dumbbell.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/lollipop.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/series-label.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/plugins/motion.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/custom/reset.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/boost.js"></script>
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highchart-binding-0.9.4/highchart.js"></script>
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/datatables-css-0.0.0/datatables-crosstalk.css">
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/datatables-binding-0.33/datatables.js"></script>
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css">
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/crosstalk-1.2.1/css/crosstalk.min.css">
-<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<script>
+var onMethodsHub = !window.HTMLWidgets;
+if (onMethodsHub) {
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/htmltools-fill-0.5.8.1/fill.css">');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/proj4js-2.3.15/proj4.js"><\/script>');
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/css/motion.css">');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts-3d.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/highcharts-more.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/stock.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/map.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/data.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/exporting.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/offline-exporting.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/drilldown.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/item-series.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/overlapping-datalabels.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/annotations.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/export-data.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/funnel.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/heatmap.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/treemap.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/sankey.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/dependency-wheel.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/organization.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/solid-gauge.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/streamgraph.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/sunburst.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/vector.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/wordcloud.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/xrange.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/tilemap.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/venn.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/gantt.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/timeline.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/parallel-coordinates.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/bullet.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/coloraxis.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/dumbbell.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/lollipop.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/series-label.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/plugins/motion.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/custom/reset.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highcharts-9.3.1/modules/boost.js"><\/script>');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/highchart-binding-0.9.4/highchart.js"><\/script>');
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/datatables-css-0.0.0/datatables-crosstalk.css">');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/datatables-binding-0.33/datatables.js"><\/script>');
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css">');
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css">');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"><\/script>');
+  document.write('<link rel="stylesheet" href="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/crosstalk-1.2.1/css/crosstalk.min.css">');
+  document.write('<script src="https://hojjatkamyabi.github.io/Datcha_quarto/index_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"><\/script>');
+}
+</script>
 ```
-:::
 
 ### 2.2 Load Your Two Datasets
 
@@ -1082,7 +1085,7 @@ slider** to see how it changes the term ranking.
 <label>Show Topics For <select id="s1" onchange="show(1)"><option value="deletion/ldavis_removed">Removed Posts</option><option value="deletion/ldavis_remaining">Remaining Posts</option><option value="deletion/ldavis_combined">Combined View</option></select></label>
 <iframe id="f1" width="100%" height="850" style="border:none"></iframe>
 <script>
-function show(n) { document.getElementById("f" + n).src = "https://hojjatkamyabi.github.io/Datcha_quarto/topic_models/" + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
+function show(n) { var base = onMethodsHub ? "https://hojjatkamyabi.github.io/Datcha_quarto/topic_models/" : "topic_models_datafiles/"; document.getElementById("f" + n).src = base + document.getElementById("s" + n).value + "_k" + document.getElementById("k" + n).value + "/index.html"; }
 show(1);
 </script>
 ```
