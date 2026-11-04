@@ -144,7 +144,7 @@ ojs_static_define <- function(...) {
 ```{=html}
 <script>
 var onMethodsHub = !window.HTMLWidgets;
-var site = "https://gesiscss.github.io/KODAQS2MH-Datcha_quarto/";
+var site = "https://hojjatkamyabi.github.io/KODAQS2MH-Datcha_quarto/";
 if (onMethodsHub) {
   document.write('<script src="' + site + 'index_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"><\/script>');
   document.write('<script src="' + site + 'index_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"><\/script>');
